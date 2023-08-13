@@ -48,7 +48,20 @@ app.post('/add_user',async (req,res)=>{
 
 } )
 
+//get method
+app.get('/get_user/:username/:password', async (req, res) => {
+  const username = req.params.username;
+  const password = req.params.password;
+  const filter = { username: username, password: password }; 
 
+  const result = await usersCollection.findOne(filter);
+
+  if (result) {
+    res.send({ message: 'User found', user: result });
+  } else {
+    res.send({ message: 'User not found' });
+  }
+});
 
 
 
