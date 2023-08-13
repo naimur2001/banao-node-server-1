@@ -34,7 +34,7 @@ async function run() {
 const usersCollection=client.db("banao-node").collection("users")
 // user adding primarily
 //post method
-app.post('/add_user',async (req,res)=>{
+app.post('/post_user',async (req,res)=>{
 
   const user=req.body;
   const query={email: user.email}
@@ -62,6 +62,25 @@ app.get('/get_user/:username/:password', async (req, res) => {
     res.send({ message: 'User not found' });
   }
 });
+
+// patch method
+app.patch('/patch_user/:username',async (req,res)=>{
+  const username = req.params.username;
+  const filter = { username: username }; 
+  const password=req.body;
+  const result = await usersCollection.findOne(filter);
+  const updateDoc={
+    $set: password
+  
+  }
+  if (result) {
+    const updated_password=await usersCollection.updateOne(filter,updateDoc);
+    res.send({ message: 'Password updated', user: result });
+  } else {
+    res.send({ message: 'Password not updated' });
+  }
+
+} )
 
 
 
