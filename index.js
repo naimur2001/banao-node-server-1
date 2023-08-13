@@ -34,19 +34,38 @@ async function run() {
 const usersCollection=client.db("banao-node").collection("users")
 // user adding primarily
 //post method
-app.post('/post_user',async (req,res)=>{
+app.post('/post_user', async (req, res) => {
+  const user = req.body;
 
-  const user=req.body;
-  const query={email: user.email}
-  const existUser=await usersCollection.findOne(query);
- 
-  if (existUser) {
-    return res.send({message: 'User already exists'})
+  // Transform email to lowercase before querying
+  user.email = user.email.toLowerCase();
+
+  const query = {
+    $and: [
+      { username: user.username },
+      { email: user.email }
+    ]
+  };
+
+  try {
+    const existingUser = await usersCollection.findOne(query);
+
+    if (existingUser) {
+      return res.send({ message: 'User already exists' });
+    }
+
+    const result = await usersCollection.insertOne(user);
+    res.send(result);
+  } catch (error) {
+    if (error.code === 11000) {
+      // Duplicate key error (unique index violation)
+      return res.send({ message: 'Username is already taken' });
+    }
+    // Handle other errors as needed
+    console.error(error);
+    res.status(500).send({ message: 'An error occurred' });
   }
-  const result=await usersCollection.insertOne(user)
-  res.send(result)
-
-} )
+});
 
 //get method
 app.get('/get_user/:username/:password', async (req, res) => {
