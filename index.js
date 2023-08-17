@@ -138,6 +138,7 @@ app.get('/get_blog/:id', async(req,res)=>{
 //blog patch method
 app.patch('/patch_blog/:id',async (req,res)=>{
   const id = req.params.id;
+try {
   const filter={_id: new ObjectId(id)};
   const option={upsert: true};
   const updating=req.body;
@@ -149,8 +150,14 @@ texts:updating.texts
   }
 const result=await blogsCollection.updateOne(filter,blog,option);
 res.send(result)
+} catch (error) {
+  res.send({message:error.message})
+
+}
 
 } )
+//blog patch method for like
+
 
 
     // Send a ping to confirm a successful connection
