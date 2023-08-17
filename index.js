@@ -3,7 +3,7 @@ const express=require("express");
 const cors=require("cors")
 const app=express();
 const port=process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // middleware
 app.use(express.json())
 app.use(cors())
@@ -31,7 +31,9 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+     //database 
 const usersCollection=client.db("banao-node").collection("users")
+const blogsCollection=client.db("banao-node").collection("blogs")
 // user adding primarily
 //post method
 app.post('/post_user', async (req, res) => {
@@ -73,6 +75,7 @@ app.get('/get_user/:username/:password', async (req, res) => {
   const password = req.params.password;
   const filter = { username: username, password: password }; 
 
+ 
   const result = await usersCollection.findOne(filter);
 
   if (result) {
@@ -100,7 +103,54 @@ app.patch('/patch_user/:username',async (req,res)=>{
   }
 
 } )
+//blog section
+// ------------------- //
+//blog post method
+app.post('/post_blog', async (req, res) => {
+  const blog = req.body;
+  const result = await blogsCollection.insertOne(blog);
+  res.send(result);
+ 
+});
+//blog get method
 
+app.get('/get_blog', async(req,res)=>{
+  const result=await blogsCollection.find().toArray();
+  res.send(result)
+})
+
+//blog get method by id
+app.get('/get_blog/:id', async(req,res)=>{
+  const id=req.params.id
+  try {
+    const query={_id: new ObjectId(id)};
+    console.log(query);
+    const result=await blogsCollection.findOne(query);
+    console.log(result);
+    res.send(result)
+  } catch (error) {
+    console.log(error.message);
+    res.send({message:error.message})
+  }
+
+})
+
+//blog patch method
+app.patch('/patch_blog/:id',async (req,res)=>{
+  const id = req.params.id;
+  const filter={_id: new ObjectId(id)};
+  const option={upsert: true};
+  const updating=req.body;
+  const blog={
+   $set:{
+    name:updating.name,
+texts:updating.texts
+   }
+  }
+const result=await blogsCollection.updateOne(filter,blog,option);
+res.send(result)
+
+} )
 
 
     // Send a ping to confirm a successful connection
