@@ -31,10 +31,13 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-     //database 
+
+     //task 1 db
 const usersCollection=client.db("banao-node").collection("users")
+// task 2 db
 const blogsCollection=client.db("banao-node").collection("blogs")
-// user adding primarily
+
+// task 1 starts  here
 //post method
 app.post('/post_user', async (req, res) => {
   const user = req.body;
@@ -104,6 +107,7 @@ app.patch('/patch_user/:username',async (req,res)=>{
 
 } )
 //blog section
+// task 2 starts  here
 // ------------------- //
 //blog post method
 app.post('/post_blog', async (req, res) => {
