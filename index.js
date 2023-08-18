@@ -157,7 +157,40 @@ res.send(result)
 
 } )
 //blog patch method for like
+app.patch('/patch_blog/like/:id',async (req,res)=>{
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
 
+
+  try {
+   const result= await blogsCollection.updateOne(filter, { $inc: { like: 1 } });
+    const updatedDocument = await blogsCollection.findOne(filter);
+    res.send(result);
+  } catch (error) {
+   
+    res.send({message:error.message})
+  }
+
+} )
+//blog patch method for comment
+app.patch('/patch_blog/comment/:id',async (req,res)=>{
+  const id = req.params.id;
+  console.log(req.body);
+  
+try {
+  const filter={_id: new ObjectId(id)};
+  // const option={upsert: true};
+  const {comment}=req.body;
+  const updateComment={$push:{comment:comment}}
+ 
+const result=await blogsCollection.updateOne(filter,updateComment);
+res.send(result)
+} catch (error) {
+  res.send({message:error.message})
+}
+
+
+} )
 
 
     // Send a ping to confirm a successful connection
