@@ -188,10 +188,18 @@ res.send(result)
 } catch (error) {
   res.send({message:error.message})
 }
-
-
 } )
-
+//blog delete method 
+app.delete('/delete_blog/:id' , async (req,res)=>{
+  const id =req.params.id;
+  try {
+    const query={_id: new ObjectId(id)}
+    const result = await blogsCollection.deleteOne(query)
+    res.send(result)
+  } catch (error) {
+    res.send({message:error.message})
+  }
+} )
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
