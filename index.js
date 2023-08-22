@@ -9,7 +9,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const cookieParser=require('cookie-parser')
-const jwtToken = process.env.JWT_TOKEN || 'naimur';
+// const jwtToken = process.env.JWT_TOKEN || 'naimur';
 
 
 // middleware
@@ -74,7 +74,12 @@ app.post('/post_user', async (req, res) => {
 
   // Transform email to lowercase before querying
   user.email = user.email.toLowerCase();
-
+  let password=user.password;
+  const person={
+    email: user.email,
+    username: user.username,
+    password:bcryptjs.hashSync(password,10)
+  }
   const query = {
     $and: [
       { username: user.username },
@@ -89,7 +94,7 @@ app.post('/post_user', async (req, res) => {
       return res.send({ message: 'User already exists' });
     }
 
-    const result = await usersCollection.insertOne(user);
+    const result = await usersCollection.insertOne(person);
     res.send(result);
   } catch (error) {
     if (error.code === 11000) {
@@ -107,10 +112,16 @@ app.get('/get_user/:username/:password', asyncHandler( async (req, res) => {
 
   const username = req.params.username;
   const password = req.params.password;
-  console.log(username);
-  console.log(password);
+
+  const matchPass= async  (enterPass,pass)=>{
+    return await bcryptjs.compare(enterPass,pass).then((data)=>data)
+  }
+  
+
   const user=await usersCollection.findOne({username})
-  if (user) {
+  console.log(matchPass(password,user.password))
+
+  if (user &&   ( await  matchPass(password,user.password )) ) {
     const token=jwt.sign({userID:user._id},process.env.JWT_TOKEN,{expiresIn: '1h'});
     res.cookie('jwt',token,{
       httpOnly:true,
