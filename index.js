@@ -46,6 +46,8 @@ async function run() {
 const usersCollection=client.db("banao-node").collection("users")
 // task 2 db
 const blogsCollection=client.db("banao-node").collection("blogs")
+
+// jwt verifyToken 
 const verifyToken= async (req, res, next)=> {
   let token;
   token=req.cookies.jwt;
@@ -58,10 +60,10 @@ const verifyToken= async (req, res, next)=> {
      req.user=await usersCollection.findOne({_id: new ObjectId(decoded.userID)})
      next()
    } catch (error) {
-     res.send({message:"Token nehi hain"})
+     res.send({message:"No Token"})
    }
   } else {
-    res.send({message:"Token nehi hain"})
+    res.send({message:"No Token"})
   }
  }
 
@@ -141,7 +143,7 @@ email:user.email})
 })) ;
 
 // patch method
-app.patch('/patch_user/:username',  async (req,res)=>{
+app.patch('/patch_user/:username',verifyToken,  async (req,res)=>{
   const username = req.params.username;
   const filter = { username: username }; 
   const password=req.body;
@@ -161,7 +163,7 @@ app.patch('/patch_user/:username',  async (req,res)=>{
 // task 2 starts  here
 // ------------------- //
 //blog post method
-app.post('/post_blog', async (req, res) => {
+app.post('/post_blog',verifyToken, async (req, res) => {
   const blog = req.body;
   const result = await blogsCollection.insertOne(blog);
   res.send(result);
@@ -179,7 +181,7 @@ app.get('/get_blog',verifyToken, async(req,res)=>{
 })
 
 //blog get method by id
-app.get('/get_blog/:id', async(req,res)=>{
+app.get('/get_blog/:id', verifyToken, async(req,res)=>{
   const id=req.params.id
   try {
     const query={_id: new ObjectId(id)};
@@ -195,7 +197,7 @@ app.get('/get_blog/:id', async(req,res)=>{
 })
 
 //blog patch method
-app.patch('/patch_blog/:id',async (req,res)=>{
+app.patch('/patch_blog/:id',verifyToken,  async (req,res)=>{
   const id = req.params.id;
 try {
   const filter={_id: new ObjectId(id)};
@@ -216,7 +218,7 @@ res.send(result)
 
 } )
 //blog delete method 
-app.delete('/delete_blog/:id' , async (req,res)=>{
+app.delete('/delete_blog/:id',verifyToken , async (req,res)=>{
   const id =req.params.id;
   try {
     const query={_id: new ObjectId(id)}
@@ -228,7 +230,7 @@ app.delete('/delete_blog/:id' , async (req,res)=>{
 } )
 
 //blog patch method for like
-app.patch('/patch_blog/like/:id',async (req,res)=>{
+app.patch('/patch_blog/like/:id',verifyToken,async (req,res)=>{
   const id = req.params.id;
   const filter = { _id: new ObjectId(id) };
 
@@ -244,7 +246,7 @@ app.patch('/patch_blog/like/:id',async (req,res)=>{
 
 } )
 //blog patch method for comment
-app.patch('/patch_blog/comment/:id',async (req,res)=>{
+app.patch('/patch_blog/comment/:id', verifyToken,async (req,res)=>{
   const id = req.params.id;
   console.log(req.body);
   
